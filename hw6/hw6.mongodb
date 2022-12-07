@@ -1,0 +1,130 @@
+// MongoDB Playground
+// To disable this template go to Settings | MongoDB | Use Default Template For Playground.
+// Make sure you are connected to enable completions and to be able to run a playground.
+// Use Ctrl+Space inside a snippet or a string literal to trigger completions.
+
+//Author: Brandon Lasher
+//Email: bl7@hood.edu
+
+
+// Select the database to use.
+//use('csit565');
+/*
+//q1)
+db.gutenbergCollection.insertOne(
+    {
+        "id" : "30000",
+        "url" : "https://www.gutenberg.org/files/30000/30000-0.txt",
+        "title" : "The Bird Book",
+        "author" : "Chester A. Reed" ,
+        "released" : "September 15, 2009",
+        "price" : 7.99  
+    }
+)
+*/
+
+/*
+//q2)
+db.gutenbergCollection.count()
+*/
+
+/*
+//q3)
+db.gutenbergCollection.update({author: "Lucius Seneca"}, 
+                     {'$set' : {'dob' : '10/10/0004 BC' }})
+
+*/
+//check
+//db.gutenbergCollection.find({author: "Lucius Seneca"}, {_id:0}).pretty()
+
+/*
+//q4)
+db.gutenbergCollection.find({"price" : {$gt: 9}}).count()
+*/
+
+/*
+//q5)
+//Find the authors who have Fred in their names and wrote books with prices less than $4.
+// Your answer should only show authors and book titles, 
+//     and output entries are ordered by author in alphabetic order.
+db.gutenbergCollection.find(
+    { 
+    "author" : {$regex : "Fred"}, 
+    "price" : {$lt: 4}
+    }
+    ,
+    {
+    _id: 0,
+    "id": 0,
+    "url": 0,
+    "released": 0,
+    "price": 0
+
+    }
+    ).sort({"author": 1})
+*/
+
+/*
+//q6) Find the number of books that each author, with his/her name containing smith, has in the collection.
+//		
+db.gutenbergCollection.aggregate([
+        {$match: { "author" : {$regex : "smith"} } },
+        {$group:  {_id: "$author", count: { $sum: 1 } }}
+	])
+*/
+
+//Questions 7 and 8
+use('sample_mflix');
+
+/*
+//q7 For each director, find the number of movies they direct and 
+//       return the top 10 directors with the most movies.
+db.movies.aggregate([
+    {$unwind: "$directors" },
+    {$group:  {_id: "$directors", count: { $count: {} } }},
+    {$sort: {"count": -1}},
+    {$limit: 10},
+])
+*/
+
+
+//q8. Combine the following movie with its comments. 
+//  For output, only output the movie title, who wrote the comment, and comment text.
+//{
+//  "_id": {
+//    "$oid": "573a1396f29313caabce4c60"
+//  },
+//  "num_mflix_comments": 4,
+//  "title": "Play It Again, Sam"
+//}
+
+db.comments.aggregate([
+{ 
+    $match: { "movie_id": ObjectId("573a1396f29313caabce4c60") } 
+},
+{ 
+    $lookup:
+    {
+        from: "movies",
+        localField: "movie_id",
+        foreignField: "_id",
+        as: "allComments"
+   }
+},
+{
+      $replaceRoot: { 
+        newRoot: 
+            { 
+                $mergeObjects: [ { $arrayElemAt: ["$allComments",0] }, "$$ROOT" ] 
+            }
+        }
+},
+{
+    $project: {
+        _id: 0,
+        "title" : 1,
+        "name" : 1,
+        "text" : 1
+    }
+}
+])

@@ -1,0 +1,168 @@
+HW 3: SQL and Constraints
+==============================
+
+****** Due: 11:59pm, Sept. 16 ******
+****** Submit a soft copy to the Blackboard ****** 
+****** Part 1: Submit the final SQL statements; the screenshot/runscript file of succeed or fail (WITH ERROR MESSAGE) to questions 11-25, 28-35.******
+****** Part 2: sql statements and outputs for questions 36-37. ******
+****** Part 3: sql statements for 38*******
+****** You can work in a group of 2 for this assignment ******
+
+Part 1. Constraints: Movie-Ratings, 15 points
+--------------------------------------------
+
+In this set of exercises you will declare integrity constraints on the data, and you will verify that they are being enforced by the underlying database management system. You will experiment with several types of constraints: key constraints, non-null constraints, unique constraints, check constraints and referential integrity. 
+
+A SQL file (rating.sql) to set up the original schema and data for the movie-ratings database is attached. You will be using the same data, but modifying the schema to add constraints. For these exercises, currently you must use PostgreSQL or SQL Server. 
+
+Schema:
+Movie ( mID, title, year, director )
+English: There is a movie with ID number mID, a title, a release year, and a director.
+
+Reviewer ( rID, name )
+English: The reviewer with ID number rID has a certain name.
+
+Rating ( rID, mID, stars, ratingDate )
+English: The reviewer rID gave the movie mID a number of stars rating (1-5) on a certain ratingDate.
+
+Unlike most of our other exercises, which are a set of queries to be written individually, this exercise set involves bigger chunks of work followed by a series of tests. If the constraints are implemented correctly, the tests will generate or not generate errors as specified. To verify that the referential integrity policies are implemented correctly, there is a check of the final database state.
+
+
+Task 1: Constraint Declarations
+
+Modify the three CREATE TABLE statements in the movie-rating database to add the following ten constraints. 
+
+Key Constraints
+
+1.  mID is a key for Movie
+2.  (title,year) is unique for Movie but null values not allowed
+3.  rID is a key for Reviewer
+4.  (rID,mID,ratingDate) is unique for Rating but with null values allowed
+
+Non-Null Constraints
+
+5.  Reviewer.name may not be NULL
+6.  Rating.stars may not be NULL
+
+Attribute-Based Check Constraints
+
+7.  Movie.year must be after 1900
+8.  Rating.stars must be in {1,2,3,4,5}
+9.  Rating.ratingDate must be after 2000
+
+Tuple-Based Check Constraints
+
+10.  "Steven Spielberg" movies must be before 1990 and "James Cameron" movies must be after 1990
+
+
+Task 2: Load the Database
+
+After creating the three tables using your modified CREATE TABLE statements, you should be able to load the original data (i.e., execute all of the INSERT statements in the data file) without any errors.
+
+Task 3: Constraint Enforcement
+
+Execute the following commands. If a command fails, copy down the error message. If a command succeeds, just write down success.
+
+11.  update Movie set mID = mID + 1;
+12.  insert into Movie values (109, 'Titanic', 1997, 'JC');
+13.  insert into Reviewer values (201, 'Ted Codd');
+14.  update Rating set rID = 205, mID = 104;
+15.  insert into Reviewer values (209, null);
+16.  update Rating set stars = null where rID = 208;
+17.  update Movie set year = year - 40;
+18.  update Rating set stars = stars + 1;
+19.  insert into Rating values (201, 101, 1, '1999-01-01');
+20.  insert into Movie values (109, 'Jurassic Park', 1993, 'Steven Spielberg');
+21.  update Movie set year = year-10 where title = 'Titanic';
+22.  insert into Movie values (109, 'Titanic', 2001, null);
+23.  update Rating set mID = 109;
+24.  update Movie set year = 1901 where director != 'James Cameron';
+25.  update Rating set stars = stars - 1;
+
+****** Expected outcome******
+Task 3: 
+11-21, fail
+22-25, succeed.
+*****End******
+
+Task 4: Referential Integrity Declarations
+
+Further modify one or more of your CREATE TABLE statements to include the following referential integrity constraints and policies.
+
+26.  Referential integrity from Rating.rID to Reviewer.rID
+          Reviewers updated: cascade
+          Reviewers deleted: set null
+          All others: use DBMS default
+
+27.  Referential integrity from Rating.mID to Movie.mID
+          Movies deleted: cascade
+          All others: use DBMS default
+
+
+Task 5: Reload the Database
+
+Recreate the three tables using your modified CREATE TABLE statements. You should be able to load the original data (i.e., execute all of the INSERT statements in the data file) without any errors.
+
+Task 6: Referential Integrity Enforcement
+
+Execute the following commands. If a command fails, copy down the error message. If a command succeeds, just write down success.
+
+Important Note: If using SQLite, make sure to turn on referential integrity checking with the command "pragma foreign_keys = on;"
+
+28.  insert into Rating values (209, 109, 3, '2001-01-01');
+29.  update Rating set rID = 209 where rID = 208;
+30.  update Rating set mID = mID + 1;
+31.  update Movie set mID = 109 where mID = 108;
+32.  update Rating set mID = 109 where mID = 102; --modified
+33.  update Reviewer set rID = rID + 10;
+34.  delete from Reviewer where rID > 215;
+35.  delete from Movie where mID < 105;
+
+******Expected outcome******
+28-31, fail
+32-35, succeed.
+******end******
+
+Part 2: SQL queries, 10 points, reload the database before querying.
+
+36. write a SQL query that returns the latest year of any movie reviewed by Chris Jackson (Explanation: Among all the movies reviewed by Chris Jackson, check the release year of the movie and return the most recent). 
+
+***** Answer *****
+1982
+*****end ****
+
+37. write a SQL query to find the title of movies with at least three ratings.
+
+***** Answer *****
+Gone with the Wind
+Raiders of the Lost Ark
+*****end *****
+
+
+Part 3: Defining Triggers, 10 points
+----------------------------------------------
+Students at your hometown high school have decided to organize their social network using databases (social.sql). So far, they have collected information about sixteen students in four grades, 9-12. Here's the schema:
+
+Highschooler ( ID, name, grade )
+English: There is a high school student with unique ID and a given first name in a certain grade.
+
+Friend ( ID1, ID2 )
+English: The student with ID1 is friends with the student with ID2. Friendship is mutual, so if (123, 456) is in the Friend table, so is (456, 123).
+
+Likes ( ID1, ID2 )
+English: The student with ID1 likes the student with ID2. Liking someone is not necessarily mutual, so if (123, 456) is in the Likes table, there is no guarantee that (456, 123) is also present.
+
+Your triggers will run over a small data set conforming to the schema. 
+
+Instructions: You are to solve each of the following problems by writing one or more triggers. 
+
+Preparation step: create a table called Student_summary_trigger that can be  used to store the number of students in each grade level, then, populate the table with initial data set. 
+
+38. write one or more triggers so that whenever a new student is inserted, or the grade of an exiting student is updated, or a student is deleted,  data in student_summary_trigger are modified  to reflect the above mentioned change made on Highschooler.
+
+39*.Write one or more triggers to manage the grade attribute of new Highschoolers. If the inserted tuple has a value less than 9 or greater than 12, change the value to NULL. On the other hand, if the inserted tuple has a null value for grade, change it to 9.
+
+40*. Write one or more triggers to maintain symmetry in friend relationships. Specifically, if (A,B) is deleted from Friend, then (B,A) should be deleted too. If (A,B) is inserted into Friend then (B,A) should be inserted too. Don't worry about updates to the Friend table. 
+
+*extra point problems.
+

@@ -1,0 +1,13 @@
+﻿In_class 1: Relational Design Review
+==============================
+
+
+Notown Records has decided to store information about musicians who perform on its albums in a database. The company has wisely chosen to hire you as a database designer (at your usual consulting fee of $2500/day).
+-- Each musician that records at Notown has an unique ID and a name; each album recorded on the Notown label has a title, a unique identification number, a copyright date, and a format (e.g., CD or MC); each song recorded at Notown has a unique identification number, a title and an author.
+-- Each album has a number of songs on it, but no song may appear on more than one album; each song is performed by one or more musicians, and a musician may perform a number of songs. 
+
+Task 1: Design and draw an ER diagram for Notown Records. Be sure to indicate all key and cardinality constraints and any assumptions you make. 
+Task 2: Convert the ER diagram from Task 1 to relational schema.
+
+
+

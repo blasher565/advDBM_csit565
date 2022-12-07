@@ -1,0 +1,255 @@
+HW 7: Neo4j CRUD Practice
+=========================================
+****** Due: 11:59 pm, Nov. 11******
+****** Points: 50 points
+****** Submit a soft copy of your code and output/confirmation to the Blackboard. If the output is large, attach the first screenshot only****** 
+***** You may use any neo4j environment of your choice ****
+****** You may work in a group of 2 *****
+
+***Create your first graph database***
+
+Attached is a graph showing the various connections between the people. 9th graders are blue, 10th graders are green, 11th graders are yellow, and 12th graders are purple. Undirected black edges indicate friendships, and directed red edges indicate that one person likes another person.
+
+Your task is to create a graph database to store this small social network. You are recommended to create a unique ID for each node. 
+
+***Query your first graph database***
+
+Notes:
+ - social_neo4j.txt is was included in the submission which has the query to create the relations.
+ - In the output of 1-3, I output all feilds due to the fact some people have the same name. 
+
+
+q1. Find all the immediate friends of Kris. 
+
+Query:
+MATCH (n:Person)-[:FRIENDS]->(p:Person {name:"Kris"}) return n
+
+Output:
+╒════════════════════════════════╕
+│"n"                             │
+╞════════════════════════════════╡
+│{"grade":"10","name":"Brittany"}│
+├────────────────────────────────┤
+│{"grade":"10","name":"Andrew"}  │
+├────────────────────────────────┤
+│{"grade":"10","name":"Haley"}   │
+└────────────────────────────────┘
+
+
+q2. Find all the secondary friends, i.e. friend's friend, of Jordan in 12th grade.
+Query:
+match (m:Person)-[:FRIENDS]->(n:Person)<-[:FRIENDS]-(p:Person {name:"Jordan", grade:"12"}) return DISTINCT m
+
+Output:
+╒═══════════════════════════════╕
+│"m"                            │
+╞═══════════════════════════════╡
+│{"grade":"11","name":"Jessica"}│
+├───────────────────────────────┤
+│{"grade":"11","name":"Austin"} │
+├───────────────────────────────┤
+│{"grade":"12","name":"John"}   │
+├───────────────────────────────┤
+│{"grade":"10","name":"Kris"}   │
+├───────────────────────────────┤
+│{"grade":"9","name":"Gabriel"} │
+└───────────────────────────────┘
+
+
+q3. Among ALL the friends of Kris, find out the ones who also like Kris.
+
+Query:
+MATCH (p:Person {name:"Kris"})-[:FRIENDS]->(m:Person)-[:LIKES]->(p2:Person {name:"Kris"})  return m
+
+Output:
+╒════════════════════════════════╕
+│"m"                             │
+╞════════════════════════════════╡
+│{"grade":"10","name":"Brittany"}│
+└────────────────────────────────┘
+
+
+*** Use the Movies database for the following questions ****
+q4. Find the movies released after 2000.  Output the movie titles only.
+
+"The Matrix Reloaded"
+"The Matrix Revolutions"
+"Something's Gotta Give"
+"The Polar Express"
+"RescueDawn"
+"The Da Vinci Code"
+
+Query:
+MATCH (m:Movie) where m.released > 2000 RETURN m.title
+
+Output:
+╒════════════════════════╕
+│"m.title"               │
+╞════════════════════════╡
+│"The Matrix Reloaded"   │
+├────────────────────────┤
+│"The Matrix Revolutions"│
+├────────────────────────┤
+│"Something's Gotta Give"│
+├────────────────────────┤
+│"The Polar Express"     │
+├────────────────────────┤
+│"RescueDawn"            │
+├────────────────────────┤
+│"The Da Vinci Code"     │
+├────────────────────────┤
+│"V for Vendetta"        │
+├────────────────────────┤
+│"Charlie Wilson's War"  │
+├────────────────────────┤
+│"Speed Racer"           │
+├────────────────────────┤
+│"Frost/Nixon"           │
+├────────────────────────┤
+│"Ninja Assassin"        │
+├────────────────────────┤
+│"Cloud Atlas"           │
+└────────────────────────┘
+
+
+
+q5. Find the cast of "Sleepless in Seattle".
+
+"Meg Ryan"
+"Victor Garber"
+"Tom Hanks"
+"Bill Pullman"
+"Rita Wilson"
+"Rosie O'Donnell"
+
+Query:
+MATCH (p:Person)-[r:ACTED_IN]-(m:Movie) where m.title = "Sleepless in Seattle" RETURN p.name
+
+Output:
+╒═════════════════╕
+│"p.name"         │
+╞═════════════════╡
+│"Meg Ryan"       │
+├─────────────────┤
+│"Victor Garber"  │
+├─────────────────┤
+│"Tom Hanks"      │
+├─────────────────┤
+│"Bill Pullman"   │
+├─────────────────┤
+│"Rita Wilson"    │
+├─────────────────┤
+│"Rosie O'Donnell"│
+└─────────────────┘
+
+q6. How many users rated the movie titled "The Da Vinci Code"?
+
+Number of reviewers
+2
+
+Query:
+MATCH (p:Person)-[r:REVIEWED]-(m:Movie) where m.title = "The Da Vinci Code" RETURN count (p)
+
+Output:
+╒═══════════╕
+│"count (p)"│
+╞═══════════╡
+│2          │
+└───────────┘
+
+
+q7. Find all movies in which Keanu Reeves appeared. For each movie, output its title, cast as a collection, and Keanu Reeves's role in that movie. 
+
+
+m.title	cast	r.roles
+"The Devil's Advocate"	["Charlize Theron", "Al Pacino"]	["Kevin Lomax"]
+"The Replacements"	["Brooke Langton", "Orlando Jones", "Gene Hackman"]	["Shane Falco"]
+"Johnny Mnemonic"	["Takeshi Kitano", "Ice-T", "Dina Meyer"]	["Johnny Mnemonic"]
+"The Matrix Revolutions"	["Hugo Weaving", "Laurence Fishburne", "Carrie-Anne Moss"]	["Neo"]
+"The Matrix Reloaded"	["Laurence Fishburne", "Carrie-Anne Moss", "Hugo Weaving"]	["Neo"]
+"Something's Gotta Give"	["Diane Keaton", "Jack Nicholson"]	["Julian Mercer"]
+"The Matrix"	["Emil Eifrem", "Laurence Fishburne", "Carrie-Anne Moss", "Hugo Weaving"]	["Neo"]
+
+Query:
+MATCH (p:Person)-[a:ACTED_IN]->(m:Movie)<-[a2:ACTED_IN]-(p2:Person {name: "Keanu Reeves"}) return m.title, collect(p.name) as cast, a2.roles
+
+Output:
+╒════════════════════════╤══════════════════════════════════════════════════════════════════════╤═══════════════════╕
+│"m.title"               │"cast"                                                                │"a2.roles"         │
+╞════════════════════════╪══════════════════════════════════════════════════════════════════════╪═══════════════════╡
+│"Something's Gotta Give"│["Diane Keaton","Jack Nicholson"]                                     │["Julian Mercer"]  │
+├────────────────────────┼──────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"The Replacements"      │["Brooke Langton","Orlando Jones","Gene Hackman"]                     │["Shane Falco"]    │
+├────────────────────────┼──────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"Johnny Mnemonic"       │["Ice-T","Dina Meyer","Takeshi Kitano"]                               │["Johnny Mnemonic"]│
+├────────────────────────┼──────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"The Devil's Advocate"  │["Al Pacino","Charlize Theron"]                                       │["Kevin Lomax"]    │
+├────────────────────────┼──────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"The Matrix Revolutions"│["Hugo Weaving","Laurence Fishburne","Carrie-Anne Moss"]              │["Neo"]            │
+├────────────────────────┼──────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"The Matrix Reloaded"   │["Hugo Weaving","Laurence Fishburne","Carrie-Anne Moss"]              │["Neo"]            │
+├────────────────────────┼──────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"The Matrix"            │["Emil Eifrem","Hugo Weaving","Laurence Fishburne","Carrie-Anne Moss"]│["Neo"]            │
+└────────────────────────┴──────────────────────────────────────────────────────────────────────┴───────────────────┘
+
+
+
+q8. Find the movies (as a collection) directed by the same directors of "The Matrix".
+
+m2.title
+"Speed Racer"
+"Cloud Atlas"
+"The Matrix Revolutions"
+"The Matrix Reloaded"
+
+I had issues with this one repeating output, so I had to add the DISTINCT tag to remove the repeating information.
+
+Query:
+MATCH (m:Movie)<-[d:DIRECTED]-(p:Person)-[d2:DIRECTED]->(m2:Movie {title:"The Matrix"}) return collect( DISTINCT m.title) as title
+
+Output:
+╒══════════════════════════════════════════════════════════════════════╕
+│"title"                                                               │
+╞══════════════════════════════════════════════════════════════════════╡
+│["Speed Racer","Cloud Atlas","The Matrix Revolutions","The Matrix Relo│
+│aded"]                                                                │
+└──────────────────────────────────────────────────────────────────────┘
+
+
+q9. Find the most prolific directors. For each director with more than 2 movies, output the name, movies directed as a collection, and the total number of movies directed. 
+
+
+p.name	Number of Movies	movies
+"Lana Wachowski"	5	["The Matrix", "The Matrix Reloaded", "The Matrix Revolutions", "Cloud Atlas", "Speed Racer"]
+"Lilly Wachowski"	5	["The Matrix", "The Matrix Reloaded", "The Matrix Revolutions", "Cloud Atlas", "Speed Racer"]
+"Rob Reiner"	3	["A Few Good Men", "Stand By Me", "When Harry Met Sally"]
+"Ron Howard"	3	["The Da Vinci Code", "Frost/Nixon", "Apollo 13"]
+
+Query:
+
+MATCH (a:Person)-[:DIRECTED]->(m:Movie) 
+WITH a.name as name, count(*) as nMovies, collect(m.title) as movies
+WHERE nMovies > 2
+RETURN name, nMovies, movies
+ORDER BY nMovies DESC LIMIT 10;
+
+
+Output:
+╒═════════════════╤═════════╤══════════════════════════════════════════════════════════════════════╕
+│"name"           │"nMovies"│"movies"                                                              │
+╞═════════════════╪═════════╪══════════════════════════════════════════════════════════════════════╡
+│"Lana Wachowski" │5        │["The Matrix","The Matrix Reloaded","The Matrix Revolutions","Cloud At│
+│                 │         │las","Speed Racer"]                                                   │
+├─────────────────┼─────────┼──────────────────────────────────────────────────────────────────────┤
+│"Lilly Wachowski"│5        │["The Matrix","The Matrix Reloaded","The Matrix Revolutions","Cloud At│
+│                 │         │las","Speed Racer"]                                                   │
+├─────────────────┼─────────┼──────────────────────────────────────────────────────────────────────┤
+│"Rob Reiner"     │3        │["A Few Good Men","Stand By Me","When Harry Met Sally"]               │
+├─────────────────┼─────────┼──────────────────────────────────────────────────────────────────────┤
+│"Ron Howard"     │3        │["The Da Vinci Code","Frost/Nixon","Apollo 13"]                       │
+└─────────────────┴─────────┴──────────────────────────────────────────────────────────────────────┘
+
+
+q10. Describe a use case where a neo4j database is preferred to a relational one. Justify your answer with at least 50 words.
+
+A simple application of a neo4j database could be a social network, as shown in the example. It can easily describe and grow relations between many different people or objects. It allows for massive scalability without a large performance hit. And it allows for nodes/users to have many different attributes without requiring them all to have the same (or have them populated with default values). 

@@ -1,0 +1,164 @@
+Brandon Lasher
+bl7@hood.edu
+
+HW 5: Storage Management, Indexing, and Relational Algebra
+=========================================
+
+****** Due: 11:59pm, Oct. 7.******
+****** Points: 45 points
+****** Submit a soft copy to the Blackboard.  ****** 
+****** You may work in a group of 2 ******
+
+
+1. (10 points) Suppose that a disk unit has the following parameters: seek time s = 20 msec; rotational delay rd = 10 msec; block transfer time btt = 1 msec; block size B = 4096 bytes. An EMPLOYEE file has the following fields: Ssn, 9 bytes; Last_name, 20 bytes; First_name, 20 bytes; Middle_init,1 byte; Birth_date, 10 bytes; Address, 35 bytes; Phone, 12 bytes; Supervisor_ssn, 9 bytes; Department, 4 bytes; Job_code, 4 bytes; deletion marker, 1 byte. The EMPLOYEE file has r = 30,000 records, fixed-length format, and unspanned blocking. Write appropriate formulas and calculate the following values for the above EMPLOYEE file:
+
+s = 20 msec
+rd = 10 msec
+btt = 1 ms
+B = 4096
+
+
+fields: 
+Ssn, 9 bytes; 
+Last_name, 20 bytes; 
+First_name, 20 bytes; 
+Middle_init,1 byte; 
+Birth_date, 10 bytes; 
+Address, 35 bytes;
+Phone, 12 bytes; 
+Supervisor_ssn, 9 bytes; 
+Department, 4 bytes; 
+Job_code, 4 bytes; 
+deletion marker, 1 byte
+
+
+a) Calculate the record size R in bytes
+9 + 20 + 20 + 1 + 10 + 35 + 12 + 9 + 4 + 4 + 1 = 125 = R
+
+b) Calculate the blocking factor bfr and the number of file blocks b, assuming an unspanned organization.
+bfr = floor( 4906 / R )  = 32
+b = ceil( 30000/ 32 ) = 938
+
+c) Calculate the time it takes to linear search for a record given its Ssn value.  You may assume data blocks are stored on the disk consecutively.
+"This requires reading and searching half the file blocks on the average, and is hence quite expensive."
+Seek time only and rotational delay only occur once.
+
+(938/1 * 1) + 30 = 499 ms = .938 sec ( worst case )
+(938/2 * 1) + 30 = 499 ms = .499 sec ( avg case )
+
+d) Assume a B+ index is created on Ssn and also assume the size of disk/block pointer is 4 bytes. Calculate 1) the maximum number of pointers/children for internal nodes, and 2) the time it takes to search for a record given its Ssn value. 
+
+ssn, 9 bytes;     //V
+pointer, 4 bytes; //p
+
+(n)*4 + (n-1)*9 = 4096
+4n + 9n - 9 = 4096
+13n = 4105
+n = 315
+
+1) n=315
+2) k = search values in file N = key vlaues = 30000
+H = logN/2 (K)  = 3
+
+3 * (20 + 10 + 1) = 93 ms
+
+
+Notes:
+. Block transfer time (btt): Once the read/write head is at the beginning of the required block, the time is needed to transfer the data in the block.
+. Unspanned organization: If records are not allowed to cross block boundaries, the organization is called unspanned.
+. blocking factor bfr: the number of records that can be stored in one data block.
+
+
+2. (10 points) Consider the following relational schema:
+
+   Course(courseName unique, department, instrID)
+   Instructor(instrID unique, office)
+   Student(studentID unique, major)
+   
+   Enroll(studentID, courseName, unique (studentID,courseName))
+
+Suppose there are five types of queries commonly asked on this schema:
+
+    a)Given a course name, find the department offering that course.
+    b)List all studentIDs together with all of the departments they are taking courses in.
+    c)Given a studentID, find the names of all courses the student is enrolled in.
+    d)List the offices of instructors teaching at least one course.
+    e)Given a major, return the studentIDs of students in that major.
+
+Suppose there are four indexes defined:
+	1) Index on Student.major 
+	2) Index on Instructor.office 
+	3) Index on Course.courseName
+	4) Index on Enroll.courseName
+
+For each query a)-e)above, indicate which index or indexes are useful in speeding up the exectution. If none of the four indexes is useful in answering a query, specify one index that can be used to improve the performance for that query.
+
+ANSWERS------
+-------------
+a) 3, Course.courseName
+b) 4, Index on Enroll.courseName and 2, Course.courseName
+c) New index? 
+d) 2, Instructor.office and 3, Course.courseName
+e) 1, Student.major 
+
+
+3. (10 points) Consider a table storing temperature readings taken by sensors:
+
+   Temps(sensorID, time, temp)
+
+Assume the pair of attributes [sensorID,time] is a key. Consider the following query:
+
+   select * from Temps
+   where sensorID = 'sensor541'
+   and time = '05:11:02'
+
+Consider the following scenarios:
+
+A - No index is present on any attribute of Temps
+B - An index is present on attribute sensorID only
+C - An index is present on attribute time only
+D - Separate indexes are present on attributes sensorID and time
+E - A multi-attribute index is present on (sensorID,time)
+
+Suppose table Temps has 50 unique sensorIDs and each sensorID has exactly 20 readings. Furthermore there are exactly 10 readings for every unique time in Temps.
+
+For each scenario A-E, determine the maximum number of tuples that might be accessed to answer the query, assuming one "best" index is used whenever possible. (Don't count the number of index accesses.) 
+
+ANSWERS------
+-------------
+a) All 1000 would need to be accessed and checked for sensor id and time. 
+b) Only the readings for a given sensor would need to be checked for time. 20. 
+c) Only the would need to be checked sensors for a given time. 10.
+d) None, just look at the intersection from the output of each of the indexes
+e) One? as it would point directly to the index group for the time?
+
+
+4.(5 points) Consider a relation stored as a randomly ordered file for which the only index is an unclustered index on a field called sal. If you want to retrieve all records with sal>20, is using the index  always  the best alternative? Explain.
+
+ANSWER-------
+-------------
+Randomly ordered file, without indexing, would cause you to need to search all entries. 
+With an unclustered index on sal, you are able to simply use the ordering of the index to determine where sal > 20. The unclustered index is sorted. 
+
+
+5. (10 points) Relational algebra problems: 
+Consider the following relations:
+employee(person_name, street, city)
+works(person_name, company_name, salary)
+company(company_name, city)
+
+Construct an expression in the relational algebra to express each of the following queries:
+
+a) Find the name of each employee who lives in city "Miami".
+b) Find the name of each employee whose salary is greater than $100000.
+c) Find the name of each employee who lives in "Miami" and whose salary is greater than $100000.
+
+
+
+
+
+
+
+
+
+

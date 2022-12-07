@@ -1,0 +1,165 @@
+HW 5: Storage Management and Indexing
+=========================================
+
+****** Due: 11:59pm, TBD.******
+****** Points: 35 points
+****** Submit a soft copy to the Blackboard.  ****** 
+****** You may work in a group of 2 ******
+
+
+1. (10 points) Suppose that a disk unit has the following parameters: seek time s = 20 msec; rotational delay rd = 10 msec; block transfer time btt = 1 msec; block size B = 4096 bytes. An EMPLOYEE file has the following fields: Ssn, 9 bytes; Last_name, 20 bytes; First_name, 20 bytes; Middle_init,1 byte; Birth_date, 10 bytes; Address, 35 bytes; Phone, 12 bytes; Supervisor_ssn, 9 bytes; Department, 4 bytes; Job_code, 4 bytes; deletion marker, 1 byte. The EMPLOYEE file has r = 30,000 records, fixed-length format, and unspanned blocking. Write appropriate formulas and calculate the following values for the above EMPLOYEE file:
+
+s = 20 msec
+rd = 10 msec
+btt = 1 ms
+B = 4096
+
+
+fields: 
+Ssn, 9 bytes; 
+Last_name, 20 bytes; 
+First_name, 20 bytes; 
+Middle_init,1 byte; 
+Birth_date, 10 bytes; 
+Address, 35 bytes;
+Phone, 12 bytes; 
+Supervisor_ssn, 9 bytes; 
+Department, 4 bytes; 
+Job_code, 4 bytes; 
+deletion marker, 1 byte
+
+The EMPLOYEE file has r = 30,000 records, fixed-length format, and unspanned blocking.
+
+
+a) Calculate the record size R in bytes
+9 + 20 + 20 + 1 + 10 + 35 + 12 + 9 + 4 + 4 + 1 = 125 = R
+
+b) Calculate the blocking factor bfr and the number of file blocks b, assuming an unspanned organization.
+bfr = floor( 4906 / R )  = 32
+b = ceil( 30000/ 32 ) = 938
+
+c) Calculate the time it takes to linear search for a record given its Ssn value.  You may assume data blocks are stored on the disk consecutively.
+"This requires reading and searching half the file blocks on the average, and is hence quite expensive."
+Seek time only and rotational delay only occur once.
+
+(938 * 1) + 30 = 968 ms = .968 sec
+(938/2 * 1) + 30 = 499 ms = .499 sec
+
+
+
+d) Assume a B+ index is created on Ssn and also assume the size of disk/block pointer is 4 bytes. Calculate 1) the maximum number of pointers/children for internal nodes, and 2) the time it takes to search for a record given its Ssn value. 
+
+
+ssn, 9 bytes;     //V
+pointer, 4 bytes; //p
+
+(n)*4 + (n-1)*9 = 4096
+4n + 9n - 9 = 4096
+15n = 4114
+n = 274
+
+1) n - 1 = 273
+2)
+
+
+Notes:
+. Block transfer time (btt): Once the read/write head is at the beginning of the required block, the time is needed to transfer the data in the block.
+. Unspanned organization: If records are not allowed to cross block boundaries, the organization is called unspanned.
+. blocking factor bfr: the number of records that can be stored in one data block.
+
+
+2. (10 points) Consider the following relational schema:
+
+   Course(courseName unique, department, instrID)
+   Instructor(instrID unique, office)
+   Student(studentID unique, major)
+   Enroll(studentID, courseName, unique (studentID,courseName))
+
+Suppose there are five types of queries commonly asked on this schema:
+
+    a)Given a course name, find the department offering that course.
+    b)List all studentIDs together with all of the departments they are taking courses in.
+    c)Given a studentID, find the names of all courses the student is enrolled in.
+    d)List the offices of instructors teaching at least one course.
+    e)Given a major, return the studentIDs of students in that major.
+
+Suppose there are four indexes defined:
+	1) Index on Student.major 
+	2) Index on Instructor.office 
+	3) Index on Course.courseName
+	4) Index on Enroll.courseName
+
+For each query a)-e)above, indicate which index or indexes are useful in speeding up the exectution. If none of the four indexes is useful in answering a query, specify one index that can be used to improve the performance for that query.
+
+3. (10 points) Consider a table storing temperature readings taken by sensors:
+
+   Temps(sensorID, time, temp)
+
+Assume the pair of attributes [sensorID,time] is a key. Consider the following query:
+
+   select * from Temps
+   where sensorID = 'sensor541'
+   and time = '05:11:02'
+
+Consider the following scenarios:
+
+A - No index is present on any attribute of Temps
+B - An index is present on attribute sensorID only
+C - An index is present on attribute time only
+D - Separate indexes are present on attributes sensorID and time
+E - A multi-attribute index is present on (sensorID,time)
+
+Suppose table Temps has 50 unique sensorIDs and each sensorID has exactly 20 readings. Furthermore there are exactly 10 readings for every unique time in Temps.
+
+For each scenario A-E, determine the maximum number of tuples that might be accessed to answer the query, assuming one "best" index is used whenever possible. (Don't count the number of index accesses.) 
+
+4.(5 points) Consider a relation stored as a randomly ordered file for which the only index is an unclustered index on a field called sal. If you want to retrieve all records with sal>20, is using the index  always  the best alternative? Explain.
+
+
+5. (9 points) Relational algebra problem: 
+Consider the following relations containing airline flight information:
+Flights(flno: integer, from: string, to: string, distance: integer, departs: time, arrives: time, aid:integer), flno is the key.
+Aircraft(aid: integer, aname: string, cruisingrange: integer), aid is the key.
+Certified_Pilot(eid: integer, aid: integer), (eid, aid) is the key.
+Employees(eid: integer, ename: string, salary: integer), eid is the key.
+
+Note that the Employees relation describes pilots and other kinds of employees as well; every pilot is certified for some aircraft (otherwise, he or she would not qualify as a pilot), and only pilots are certified to fly. Write the following queries in relational algebra.
+
+1). Find the names of pilots and the aircraft names for which they are certified.
+2). Find the names of pilots certified for some Boeing aircraft.
+3). Identify the flights that can be piloted by every pilot whose salary is more than $100,000.
+
+6. (6 points) Consider the following relational schema and SQL query. The schema captures information about employees, departments, and company finances (organized on a per department basis).
+
+Emp(eid: integer, did: integer, sal: integer, hobby: char(20), primary key(eid)) 
+Dept(did: integer, dname: char(20), floor: integer, phone: char(10),primary key(did))
+Finance(did: integer, budget: real, sales: real, expenses: real, primary key(did))
+
+Consider the following query:
+
+SELECT D.dname, F.budget
+FROM Emp E, Dept D, Finance F
+WHERE E.did=D.did AND D.did=F.did AND D.floor=1
+AND E.sal = 59000 AND E.hobby = 'yodeling'
+;
+
+Identify an evaluation plan (represented as a tree of relational operators) that reflects the order of operations a decent query optimizer would choose.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

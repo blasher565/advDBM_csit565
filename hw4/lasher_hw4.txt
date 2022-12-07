@@ -1,0 +1,402 @@
+Brandon Lasher
+Email: bl7@hood.edu
+Date: 9/21/2022
+CSIT565 - Homework 4
+
+Note: I also included .sql scripts for each of the parts incase it is difficult to follow in the .txt format. To use them, you will have to modify the source line which loads the inital
+   database for each of the problems. 
+
+
+HW 4: Views, Triggers and Procedures
+==============================
+
+****** Due: 11:59pm, Sept. 23*****
+****** Submit a soft copy to the Blackboard. ****** 
+****** Please compile your solutions and output, if applicable, into one .txt file. No .doc or pdf file please. ******
+****** Please use MySql for this assignment ******
+****** You may work in a group of 2. Only one submission per group please. ******
+
+
+
+Problem 1. Defining and Using Views, 10 points
+-------------------------------------
+
+You will define (virtual) views over the movie-ratings database, and you will write queries that reference the views instead of or in addition to the base tables. Use the same rating(original) database for this part. 
+
+Schema:
+Movie ( mID, title, year, director )
+English: There is a movie with ID number mID, a title, a release year, and a director.
+
+Reviewer ( rID, name )
+English: The reviewer with ID number rID has a certain name.
+
+Rating ( rID, mID, stars, ratingDate )
+English: The reviewer rID gave the movie mID a number of stars rating (1-5) on a certain ratingDate.
+ 
+Each exercise asks you to create a view, and then write a query using that view, perhaps along with previously created views and/or the base tables. 
+
+1).  Create a view called TNS containing title-name-stars triples, where the movie (title) was reviewed by a reviewer (name) and received the rating (stars). Then referencing only view TNS and table Movie, write a SQL query that returns the lastest year of any movie reviewed by Chris Jackson. You may assume movie names are unique.
+
+
+/*To create the view*/
+CREATE VIEW TNS AS 
+    SELECT Movie.title, Reviewer.name, Rating.stars 
+    FROM Movie, Reviewer, Rating
+    WHERE Rating.rID = Reviewer.rID and Movie.mID = Rating.mID;
+
+
+/*To select the year*/
+SELECT max(Movie.year) 
+FROM TNS, Movie
+WHERE TNS.Title = Movie.Title and TNS.name = 'Chris Jackson';
+
+
+/* Output 
+
++-----------------+
+| max(Movie.year) |
++-----------------+
+|            1982 |
++-----------------+
+
+*/
+
+
+*** Expected ***
+1982
+******
+
+2).  Referencing view TNS from Exercise 1 and no other tables, create a view RatingStats containing each movie title that has at least one rating, the number of ratings it received, and its average rating. Then referencing view RatingStats and no other tables, write a SQL query to find the title of the highest-average-rating movie with at least three ratings.
+
+/* To create the view */
+CREATE VIEW RatingStats AS 
+    SELECT TNS.title, count(TNS.title) as numRating, AVG(TNS.stars) as avgRating
+    FROM TNS
+    GROUP BY title;
+
+
+/*To select only the high-rated with atleast 3 ratings*/
+SELECT title 
+    FROM RatingStats 
+    WHERE numRating >= 3 
+    ORDER BY avgRating DESC LIMIT 1;
+
+/* Output
+
++-------------------------+
+| title                   |
++-------------------------+
+| Raiders of the Lost Ark |
++-------------------------+
+
+*/
+
+
+*** Expected ***
+Raiders of the Lost Ark
+******
+
+
+Problem 2. Automated View Updates (Use the same movie-rating database), 15 points
+-----------------------------------------------------
+
+Create a view called Post80 that contains the title and year of movies made after 1980. Do not use WITH CHECK OPTION in the CREATE VIEW statement.
+
+(a) Is it possible to have a "mishandled insertion," where an insert into view Post80 is accepted, it causes a modification to the underlying database, but the insertion is not reflected properly in the view afterward? (For this problem and all others in this set, assume insertion commands specify values for all attributes.) If so, give an example.
+
+Yes, without the check I can insert movies which are prior to 1980 and not have them show in Post80, but will show in the movie table. This will also cause NULL values to be represented in the non-view  mapped values.
+
+Example:
+SELECT * FROM Post80;
+
+/* Output 
+
++-------------------------+------+
+| title                   | year |
++-------------------------+------+
+| E.T.                    | 1982 |
+| Titanic                 | 1997 |
+| Avatar                  | 2009 |
+| Raiders of the Lost Ark | 1981 |
++-------------------------+------+
+
+*/
+
+insert into Post80 values('Hocus Bogus', 1979);
+
+SELECT * FROM Post80;
+
+/* Output
++-------------------------+------+
+| title                   | year |
++-------------------------+------+
+| E.T.                    | 1982 |
+| Titanic                 | 1997 |
+| Avatar                  | 2009 |
+| Raiders of the Lost Ark | 1981 |
++-------------------------+------+
+*/
+
+
+SELECT * FROM Movie;
+/* Output 
++------+-------------------------+------+------------------+
+| mID  | title                   | year | director         |
++------+-------------------------+------+------------------+
+|  101 | Gone with the Wind      | 1939 | Victor Fleming   |
+|  102 | Star Wars               | 1977 | George Lucas     |
+|  103 | The Sound of Music      | 1965 | Robert Wise      |
+|  104 | E.T.                    | 1982 | Steven Spielberg |
+|  105 | Titanic                 | 1997 | James Cameron    |
+|  106 | Snow White              | 1937 | NULL             |
+|  107 | Avatar                  | 2009 | James Cameron    |
+|  108 | Raiders of the Lost Ark | 1981 | Steven Spielberg |
+| NULL | Hocus Bogus             | 1979 | NULL             |
++------+-------------------------+------+------------------+
+*/
+
+
+(b) Is it possible to have a "mishandled deletion," where a delete command on view Post80 is accepted, it causes a modification to the underlying database, but the deletion is not reflected properly in the view afterward? If so, give an example.
+
+Yes, without the check I can remove values not seen by the view. They will not shown in the view but it will modify the underlying table. ( Note I assume a fresh dB load for this exmaple )
+
+Example:
+SELECT * FROM Post80;
+
+/* Output 
+
++-------------------------+------+
+| title                   | year |
++-------------------------+------+
+| E.T.                    | 1982 |
+| Titanic                 | 1997 |
+| Avatar                  | 2009 |
+| Raiders of the Lost Ark | 1981 |
++-------------------------+------+
+
+*/
+
+DELETE FROM Post80 WHERE title = 'Star Wars'
+
+SELECT * FROM Post80;
+
+/* Output
++-------------------------+------+
+| title                   | year |
++-------------------------+------+
+| E.T.                    | 1982 |
+| Titanic                 | 1997 |
+| Avatar                  | 2009 |
+| Raiders of the Lost Ark | 1981 |
++-------------------------+------+
+*/
+
+
+SELECT * FROM Movie;
+/* Output -- Star Wars is now gone
+
++------+-------------------------+------+------------------+
+| mID  | title                   | year | director         |
++------+-------------------------+------+------------------+
+|  101 | Gone with the Wind      | 1939 | Victor Fleming   |
+|  102 | Star Wars               | 1977 | George Lucas     |
+|  103 | The Sound of Music      | 1965 | Robert Wise      |
+|  104 | E.T.                    | 1982 | Steven Spielberg |
+|  105 | Titanic                 | 1997 | James Cameron    |
+|  106 | Snow White              | 1937 | NULL             |
+|  107 | Avatar                  | 2009 | James Cameron    |
+|  108 | Raiders of the Lost Ark | 1981 | Steven Spielberg |
++------+-------------------------+------+------------------+
+*/
+
+
+
+
+(c) Is it possible to have a "mishandled update," where an update command on view Post80 is accepted, it causes a modification to the underlying database, but the update is not reflected properly in the view afterward? If so, give an example.
+
+Yes. I can update the year of an exisiting record in Post80 to something that will still exist in the main table(Movie) but it will now not show in the Poat80 view. 
+
+Example: 
+SELECT * FROM Post80;
+
+/* Output 
+
++-------------------------+------+
+| title                   | year |
++-------------------------+------+
+| E.T.                    | 1982 |
+| Titanic                 | 1997 |
+| Avatar                  | 2009 |
+| Raiders of the Lost Ark | 1981 |
++-------------------------+------+
+
+*/
+
+UPDATE Post80 SET year = 1720 WHERE title = 'Avatar';
+
+SELECT * FROM Post80;
+/* Output
++-------------------------+------+
+| title                   | year |
++-------------------------+------+
+| E.T.                    | 1982 |
+| Titanic                 | 1997 |
+| Raiders of the Lost Ark | 1981 |
++-------------------------+------+
+*/
+
+SELECT * FROM Movie;
+
+
+/* Output
++------+-------------------------+------+------------------+
+| mID  | title                   | year | director         |
++------+-------------------------+------+------------------+
+|  101 | Gone with the Wind      | 1939 | Victor Fleming   |
+|  102 | Star Wars               | 1977 | George Lucas     |
+|  103 | The Sound of Music      | 1965 | Robert Wise      |
+|  104 | E.T.                    | 1982 | Steven Spielberg |
+|  105 | Titanic                 | 1997 | James Cameron    |
+|  106 | Snow White              | 1937 | NULL             |
+|  107 | Avatar                  | 1720 | James Cameron    |
+|  108 | Raiders of the Lost Ark | 1981 | Steven Spielberg |
+| NULL | Hocus Bogus             | 1979 | NULL             |
++------+-------------------------+------+------------------+
+*/
+
+
+
+
+
+(d) Drop view Post80 and create it again, this time using WITH CHECK OPTION. For each of (a), (b), and (c) where you gave an example of a mishandled modification, is the modification still permitted?
+
+No modification is not permitted.  The insert gives an error. The delete does not find anything to delete. Update also gives an error and will not modify the record.
+
+/* Insert */
+ insert into Post80 values('Hocus Bogus', 1979);
+ERROR 1369 (HY000): CHECK OPTION failed 'csit565.Post80'
+
+/*Delete*/ 
+ DELETE FROM Post80 WHERE title = 'Star Wars';
+Query OK, 0 rows affected (0.00 sec)
+
+/*Update */
+ UPDATE Post80 SET year = 1720 WHERE title = 'Avatar';
+ERROR 1369 (HY000): CHECK OPTION failed 'csit565.Post80'
+
+/* Post80 and Movie tables
++-------------------------+------+
+| title                   | year |
++-------------------------+------+
+| E.T.                    | 1982 |
+| Titanic                 | 1997 |
+| Avatar                  | 2009 |
+| Raiders of the Lost Ark | 1981 |
++-------------------------+------+
+
++------+-------------------------+------+------------------+
+| mID  | title                   | year | director         |
++------+-------------------------+------+------------------+
+|  101 | Gone with the Wind      | 1939 | Victor Fleming   |
+|  102 | Star Wars               | 1977 | George Lucas     |
+|  103 | The Sound of Music      | 1965 | Robert Wise      |
+|  104 | E.T.                    | 1982 | Steven Spielberg |
+|  105 | Titanic                 | 1997 | James Cameron    |
+|  106 | Snow White              | 1937 | NULL             |
+|  107 | Avatar                  | 2009 | James Cameron    |
+|  108 | Raiders of the Lost Ark | 1981 | Steven Spielberg |
++------+-------------------------+------+------------------+
+
+ */
+
+
+Problem 3: Defining Stored Procedures (Use the same social network database), 10 points
+----------------------------------------------
+Preparation step: create a table, called student_summary_sp that can be  used to store the number of students in each grade level, then, populate the table with initial data set. 
+1). write a stored procedure to update the number of students in a given grade level with given change, e.x.  2 more students in grade 9.
+
+DELIMITER //
+
+CREATE PROCEDURE updateNumStudents( in gradeLevel int, in changeAmt int )
+begin
+     update student_summary_sp 
+             set numStudents = student_summary_sp.numStudents + changeAmt
+             WHERE grade = gradeLevel;
+end;//
+
+DELIMITER ;
+
+/*
+Example:
+SELECT * FROM student_summary_sp;
+
++-------+-------------+
+| grade | numStudents |
++-------+-------------+
+|     9 |           0 |
+|    10 |           0 |
+|    11 |           0 |
+|    12 |           0 |
++-------+-------------+
+
+call updateNumStudents(9,2);
+Query OK, 1 row affected (0.01 sec)
+
+SELECT * FROM student_summary_sp;
++-------+-------------+
+| grade | numStudents |
++-------+-------------+
+|     9 |           2 |
+|    10 |           0 |
+|    11 |           0 |
+|    12 |           0 |
++-------+-------------+
+
+*/
+
+
+
+2). write a stored procedure to update/refresh the number of students in all grade levels simultaneously, i.e. reflecting all changes in Highschooler relation when the stored procedure is called.
+
+DELIMITER //
+
+CREATE PROCEDURE updateNumStudents_All()
+begin
+     update student_summary_sp 
+             set numStudents = (SELECT count(*) FROM Highschooler WHERE grade = student_summary_sp.grade);
+end;//
+
+DELIMITER ;
+
+/* Example
+
+SELECT * from student_summary_sp;
++-------+-------------+
+| grade | numStudents |
++-------+-------------+
+|     9 |           0 |
+|    10 |           0 |
+|    11 |           0 |
+|    12 |           0 |
++-------+-------------+
+
+call updateNumStudents_All();
+Query OK, 4 rows affected (0.01 sec)
+
+SELECT * from student_summary_sp;
++-------+-------------+
+| grade | numStudents |
++-------+-------------+
+|     9 |           4 |
+|    10 |           4 |
+|    11 |           4 |
+|    12 |           4 |
++-------+-------------+
+
+
+*/
+
+
+
+
+

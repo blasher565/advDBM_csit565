@@ -1,0 +1,22 @@
+HW 1: Relational Design Theory
+==============================
+
+*******Assigned: Aug. 25
+****** Due: before class, Sept. 1 ******
+****** Points: 30
+****** Turn in a hard copy and submit a soft copy to the Blackboard. ****** 
+****** Hand-written Diagram is accepted if it is neat. Computerized format is preferred. ******
+
+Design by Entity Relationship modeling (If you use an ER notation other than the one in our textbook, please attach a legend)
+
+Consider a MAIL_ORDER database in which employees take orders for parts from customers. The data requirements are summarized as follows:
+
+- The mail order company has employees-- employee number, name, date of hire, and zip code, identified by employee number
+- Each customer of the company is identified by a unique customer number and has the following information recorded: name, street, zip code and phone number. 
+- Each parts sold by the company is identified by a unique part number and has the following  information: a part name, price and quantity on stock.
+- Each order placed by a customer is taken by an employee and is given a unique number. Each order contains specified quantities of one or more parts. Each order has a date of receipt as well as expected ship date. The actual ship date is also recorded.
+
+Your tasks:
+
+a) Draw an ER Diagram for this situation. State any assumptions that you have made. 
+b) Convert your design to relational schemas.

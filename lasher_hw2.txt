@@ -1,0 +1,127 @@
+Brandon Lasher 
+CSIT565
+
+HW 2: Relational Design Theory
+==============================
+****** Assigned: Sept. 1 ******
+****** Due: before class, Sept. 8 *****
+****** Submit a soft copy to the Blackboard. Please show the decomposition process for better understanding your solutions.****** 
+
+1. Design by Decomposition
+
+ 
+Consider the following relational schema:
+
+Sale(salesman, store, commission_rate, city, date_sold, product, style, color)   // a salesman sold a product on a particular day
+Product(product, style, color, price)   // prices, available styles and colors for products
+
+Make the following assumptions, and only these assumptions, about the real world being modeled:
+
+-- Each salesman works in one store and has one fixed commission rate.
+-- Each store is in one city.
+-- A given product always has the same price, regardless of style or color.
+-- Each product is available in one or more styles and one or more colors, and each product is available in all combinations of styles and colors for that product.
+
+Sale does not contain duplicates: If a salesman sells more than one of a given product in a given style and color on a given day, still only one tuple appears in relation Sale to record that fact.
+
+(a) Specify a set of completely nontrivial functional dependencies for relations Sale and Product that encodes the assumptions described above and no additional assumptions.
+
+Sale FDs:
+salesman->store, commission_rate
+store->city
+product->>style,color
+
+Product FDs:
+product->price
+product->>style,color
+
+
+(b) Based on your functional dependencies in part (a), specify all minimal keys for relations Sale and Product.
+
+These do not assume multi-relations when dealing with style and color, they will be added in later questions?
+
+Sale minimal-key: ( salesman, date_sold, product )
+Product minimal-key: ( product )
+
+
+(c) Is the schema in Boyce-Codd Normal Form (BCNF) according to your answers to (a) and (b)? If not, give a decomposition into BCNF.
+
+Sale(salesman, store, commission_rate, city, date_sold, product, style, color)
+Sale Key: { salesman, date_sold, product }
+{ salesman, date_sold, product, style, color}+ = ( salesman, store, commission_rate, city, date_sold, product, style, color )
+
+salesman->store, commission_rate :: not in BCNF
+{salesman}+ = store, commission_rate, city     
+    S0 = (salesman, store, commission_rate, city)
+	   -> With key = salesman    
+  	      FD's are ::  
+		      salesman -> store, commission_rate   which is    (salesman, store,commission_rate)  This is BCNF since key is salesman and it matches our FD
+			  store -> city                       This is not BCNF
+			  
+			-> {store}+ = store, city
+			    With key store::
+				   FD's are :: 
+				       store -> city  which is  ( store, city )  This is BCNF as it matches our FD
+					   
+					   
+								
+			  
+	   
+	   
+	S0-{salesman}+ = date_sold, product, style, color  
+		S1 = (salesman, date_sold, product, style, color ) 
+		   -> With key = salesman, product    
+		   FD's are ::  
+			   product->>style,color  which is (product, style, color ) This is BCNF
+			   
+			   S1 - {salesman, product}+ = date_sold  
+		   
+		   
+For Sale(salesman, store, commission_rate, city, date_sold, product, style, color)
+
+R0 = (salesman, store, commission_rate) 
+R1 = (store, city) 
+R2 = (product, color, style) 
+R3 = (date_sold)
+	   
+For Product(product, style, color, price)
+Product Key: ( product )
+
+{product}+ = price, style, color , so this is BCNF
+
+R0 =  (product, price, style, color)
+
+P0( product, price )
+P1( product, style, color)
+
+
+(d) Now consider your decomposed relations from part (c), or the original relations if you did not need to decompose them for part (c). Specify a set of nontrivial multivalued dependencies for relations Sale and Product that encodes the assumptions described above and no additional assumptions. Do not include multivalued dependencies that also are functional dependencies.
+
+I am not sure how to answer this question... Because of the multiple sytles and products inorder to be in 4NF form we will need to add relations for each of the multivalued relations
+
+so R2 from Sale will become 
+(product, color) and (product, style) 
+ 
+
+and R0 from Product will become
+(product, price), (product, color) and (product, style) 
+
+
+
+
+(e) Are the relations you used in part (d) in Fourth Normal Form (4NF) according to your answers for (a)-(d)? If not, give a decomposition into 4NF.
+
+The full decomposition is:
+
+For Sale(salesman, store, commission_rate, city, date_sold, product, style, color)
+R0 = (salesman, store, commission_rate) 
+R1 = (store, city) 
+R2 = (product, color)
+R3 = (product, style) 
+R4 = (date_sold)
+
+
+For Product(product, style, color, price)
+R0 = (product, price)
+R1 = (product, color)
+R3 = (product, style) 

@@ -1,0 +1,135 @@
+
+
+
+Query processing and optimization (Heuristic approach)
+=======================
+
+Consider the following relational schema and SQL query. The schema captures information about employees, departments, and company finances (organized on a per department basis).
+
+Emp(eid: integer, did: integer, sal: integer, hobby: char(20), primary key(eid)) 
+Dept(did: integer, dname: char(20), floor: integer, phone: char(10),primary key(did))
+Finance(did: integer, budget: real, sales: real, expenses: real, primary key(did))
+
+Consider the following query:
+
+SELECT D.dname, F.budget
+FROM Emp E, Dept D, Finance F
+WHERE E.did=D.did AND D.did=F.did AND D.floor=1
+AND E.sal = 59000 AND E.hobby = 'yodeling'
+;
+
+Identify an evaluation plan (represented as a tree of relational operators) that reflects the order of operations a decent query optimizer would choose.
+
+E
+|
+Sig(hobby=yodeling & sal=59000)
+|
+Proj(E.did)
+
+
+D
+|
+sig(floor =1)
+|
+Proj( did, dname)
+
+F
+|
+Proj( did, budget)
+
+
+
+Proj( dname, budget) FROM Join( Join(ProjE, ProjD) , ProjF )
+
+
+
+Concurrency control
+=======================
+
+Schedules
+========
+    A schedule is serializable if its effects are equivalent to the effects of some serial schedule.
+    A schedule is recoverable if every transaction commits only after all transactions whose changes they read have committed.
+    A schedule is cascadeless when it avoids dirty reads: reads of data that have been modified by uncommitted transactions. 
+
+In the exercises below, determine whether or not the provided schedule has each of the above properties.
+
+    Schedule A:
+
+    T1 		T2
+    read(X) 	 
+      		read(X)
+    write(Y) 	 
+      		write(Y)
+    commit 	 
+      		commit
+
+1) Is this schedule serializable?  Yes
+       
+2) Is this recoverable?   Yes
+        
+3) Is this cascadeless?  Yes
+
+   Schedule B:
+	
+	T1 		T2
+	read(X) 	 
+	  		write(X)
+	read(X) 	 
+	write(Y) 	 
+	  		commit
+	commit 	 
+
+4) Is this schedule serializable? No
+       
+5) Is this recoverable?  Yes
+        
+6) Is this cascadeless?	 No
+
+
+
+
+
+Locking and Deadlock Handling
+=========================
+Consider the following schedule involving the transactions T1, T2, and T3:
+
+r1(X); r1(Z); w2(Y); w2(X); r3(Z); w3(Y); w1(Z); c1; c2; c3
+
+Assume that the DBMS uses strict 2PL.
+Let's say that the system performs deadlock detection using a waits-for graph. For each action in the schedule, indicate:
+
+1) which locks would need to be requested (if any) before the action could be performed
+2) the results of the lock requests, including any changes to the waits-for graph and whether deadlock would occur.
+
+
+Database Recovery
+===============	
+Based on the undo-redo log shown below, answer the following questions.
+
+    LSN 	record contents      
+    00 		txn: 1; BEGIN
+    10 		txn: 1; item: D1 old: 100; new: 70
+    20 		txn: 2; BEGIN
+    30 		txn: 1; COMMIT
+    40 		txn: 2; item: D1 old: 70; new: 400
+    50 		CHECKPOINT
+    60 		txn: 2; item: D3 old: "hello"; new: "howdy"
+    70 		txn: 3; BEGIN
+    80 		txn: 3; item: D2 old: 15; new: 70
+    90 		txn: 2; COMMIT
+    100 	txn: 3; item: D1 old: 400; new: 55
+    CRASH
+    	
+    
+ 1)Under undo-redo logging, what must be written to log disk when txn 1 commits?
+    
+ 2)What information must be included in log record 50?
+    
+ 3)At the start of recovery, what are the possible values that D1 could have on data disk?
+    
+ 4)What would be the answer to the previous question if the checkpoint recorded in log record 50 had never occurred?
+
+ 5) Describe what actions needed to be done on recovery.
+
+    

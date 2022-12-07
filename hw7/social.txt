@@ -1,0 +1,110 @@
+//Creates the social network fromt eh diagram
+
+CREATE ( j9:Person{name:'Jordan', grade:'9'}),
+	   ( g9:Person{name:'Gabriel', grade:'9'}),
+	   ( c9:Person{name:'Cassandra', grade:'9'}),
+	   ( t9:Person{name:'Tiffany', grade:'9'}),
+	   
+	   ( k10:Person{name:'Kris', grade:'10'}),
+	   ( h10:Person{name:'Haley', grade:'10'}),
+	   ( a10:Person{name:'Andrew', grade:'10'}),
+	   ( b10:Person{name:'Brittany', grade:'10'}),   
+	   
+	   ( a11:Person{name:'Alexis', grade:'11'}),
+	   ( g11:Person{name:'Gabriel', grade:'11'}),
+	   ( au11:Person{name:'Austin', grade:'11'}),
+	   ( j11:Person{name:'Jessica', grade:'11'}), 
+
+	   ( j12:Person{name:'Jordan', grade:'12'}),
+	   ( john12:Person{name:'John', grade:'12'}),
+	   ( k12:Person{name:'Kyle', grade:'12'}),
+	   ( l12:Person{name:'Logan', grade:'12'}),
+
+//Friend relations
+//Grade 9	   
+(j9)-[:FRIENDS]->(g9),
+(j9)-[:FRIENDS]->(c9),
+(j9)-[:FRIENDS]->(t9),
+
+(g9)-[:FRIENDS]->(j9),
+(g9)-[:FRIENDS]->(c9),
+(g9)-[:FRIENDS]->(a10),
+
+(t9)-[:FRIENDS]->(j9),
+(t9)-[:FRIENDS]->(a11),
+
+(c9)-[:FRIENDS]->(g9),
+(c9)-[:FRIENDS]->(a11),
+
+//Grade 10
+(k10)-[:FRIENDS]->(a10),
+(k10)-[:FRIENDS]->(b10),
+(k10)-[:FRIENDS]->(h10),
+
+(h10)-[:FRIENDS]->(k10),
+(h10)-[:FRIENDS]->(b10),
+
+(a10)-[:FRIENDS]->(k10),
+(a10)-[:FRIENDS]->(au11),
+(a10)-[:FRIENDS]->(j12),
+
+(b10)-[:FRIENDS]->(k10),
+(b10)-[:FRIENDS]->(h10),
+
+//Grade 11
+(a11)-[:FRIENDS]->(t9),
+(a11)-[:FRIENDS]->(c9),
+(a11)-[:FRIENDS]->(j11),
+(a11)-[:FRIENDS]->(g11),
+
+(au11)-[:FRIENDS]->(a10),
+(au11)-[:FRIENDS]->(k12),
+
+(g11)-[:FRIENDS]->(a11),
+(g11)-[:FRIENDS]->(j11),
+
+(j11)-[:FRIENDS]->(a11),
+(j11)-[:FRIENDS]->(g11),
+(j11)-[:FRIENDS]->(k12),
+
+//Grade 12
+(j12)-[:FRIENDS]->(a10),
+(j12)-[:FRIENDS]->(l12),
+(j12)-[:FRIENDS]->(k12),
+
+(john12)-[:FRIENDS]->(l12),
+
+(k12)-[:FRIENDS]->(j12),
+(k12)-[:FRIENDS]->(au11),
+(k12)-[:FRIENDS]->(j11),
+
+(l12)-[:FRIENDS]->(j12),
+(l12)-[:FRIENDS]->(john12),
+
+//Like relations
+//Grade 9
+(g9)-[:LIKES]->(c9),
+(c9)-[:LIKES]->(g9),
+
+//Grade 10
+(a10)-[:LIKES]->(c9),
+(b10)-[:LIKES]->(k10),
+
+//Grade 11
+(a11)-[:LIKES]->(k10),
+(g11)-[:LIKES]->(a11),
+(au11)-[:LIKES]->(j12),
+(j11)-[:LIKES]->(k12),
+
+//Grade 12
+(k12)-[:LIKES]->(j11),
+(john12)-[:LIKES]->(h10)
+
+
+
+
+
+
+
+
+
